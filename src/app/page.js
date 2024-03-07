@@ -1,95 +1,61 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client"
+
+import { useRef, useState } from "react"
+import Header from "./components/Header";
+import TaskList from "./components/TaskList";
+import { FaPlus } from "react-icons/fa";
+import { IoMdClose } from "react-icons/io";
+import { MdClearAll } from "react-icons/md";
+import { FaSort } from "react-icons/fa";
 
 export default function Home() {
+  const dialogRef = useRef();
+  const [list, setList] = useState([]);
+
+  const [inputVal, setInputVal] = useState('');
+
+  const handleDialogAction = () => {
+    dialogRef.current.showModal();
+  }
+  const handleCloseDialog = () => {
+    dialogRef.current.close();
+  }
+  const handleAddTask = () => {
+    handleCloseDialog();
+    setList([...list, { task: inputVal, done: false }])
+  }
+
+  const handleUpdateList = (index) => {
+    let temp = [...list];
+    temp[index].done = !temp[index].done;
+    setList([...temp]);
+  }
+  const handleClearList = () => {
+    let temp = [...list];
+    setList([...temp.filter((item) => item.done===false)]);
+  }
+  const handleSortList = () => {
+    let temp = [...list];
+    let doneList = temp.filter((task) => task.done===true);
+    let yetList = temp.filter((task) => task.done===false);
+    setList([...yetList,...doneList]);
+  }
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    <>
+      <section>
+        <Header />
+        <TaskList tasklist={list} updateList={handleUpdateList} />
+        <button className="action-button" onClick={handleDialogAction}><FaPlus /></button>
+        <FaSort className="side-icon sort" onClick={handleSortList}/>
+        <MdClearAll className="side-icon clear-all" onClick={handleClearList}/>
+      </section>
+      <dialog ref={dialogRef}>
+        <IoMdClose onClick={handleCloseDialog} />
+        <form method="dialog">
+          <input placeholder="type your task" value={inputVal} onChange={(e) => setInputVal(e.target.value)} />
+          <button onClick={(e) => { e.preventDefault(); handleAddTask() }}>Add</button>
+        </form>
+      </dialog>
+    </>
   );
 }
